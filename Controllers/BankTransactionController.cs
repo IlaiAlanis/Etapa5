@@ -55,7 +55,7 @@ public class BankTransactionController : ControllerBase
            if (!validationResult.Equals("Valid"))
                 return BadRequest(new { message = validationResult});
             await bankTransactionService.TransactionCash(account);
-            return CreatedAtAction(nameof(GetById), new { id = account.AccountId}, account);
+            return CreatedAtAction(nameof(bankTransactionService.GetByID), new { id = id}, accountToUpdate);
         }
         else
         {
@@ -71,13 +71,13 @@ public class BankTransactionController : ControllerBase
             return BadRequest(new { message = $"El ID ({id}) de la URL no coincide con el ID({account.AccountId}) del cuerpo de la solicitud."});
         var accountToUpdate = await bankTransactionService.GetByID(id);
 
-        if (accountToUpdate is not null)
+        if (accountToUpdate is not null && account.ExternalAccount is not null)
         {
            string validationResult = await ValidateAccount(account);
            if (!validationResult.Equals("Valid"))
                 return BadRequest(new { message = validationResult});
             await bankTransactionService.TransactionTransfer(account);
-            return NoContent();
+            return CreatedAtAction(nameof(bankTransactionService.GetByID), new { id = id}, accountToUpdate);
         }
         else
         {
